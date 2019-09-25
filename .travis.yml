@@ -1,0 +1,21 @@
+sudo: true
+dist: xenial 
+services:
+  - docker
+language: python 
+python:
+  - "3.4"
+
+before_install:
+  - pip3 install cwltool
+  - docker build -t viralverify_bionitio .
+
+script:
+  # Both of these same tests, in Docker
+  # Functional tests
+  - docker run --entrypoint /viralverify_bionitio/.travis/unit-test.sh viralverify_bionitio
+  # Unit tests
+  - docker run --entrypoint /viralverify_bionitio/functional_tests/viralverify_bionitio-test.sh viralverify_bionitio -p viralverify_bionitio -d /viralverify_bionitio/functional_tests/test_data -v
+
+  # CWL definition test
+  - cwltool viralverify_bionitio.cwl --fasta_file functional_tests/test_data/two_sequence.fasta
